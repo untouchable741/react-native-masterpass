@@ -1,9 +1,14 @@
 import querystring from 'querystring';
 
+
 module.exports = {
-	pairingRequest: (apiConfig, authToken, deviceToken) => {
-		const { pairingRequestUrl, authKey, brandCode } = apiConfig;
-		const apiUrl = `${pairRequestUrl}/${brandCode}`;
+	initialize: (apiConfig) => {
+		this.apiConfig = apiConfig
+	},
+
+	pairingRequest: (authToken, deviceToken) => {
+		const { baseUrl, pairingRequestUrl, authKey, brandCode } = this.apiConfig;
+		const apiUrl = `${baseUrl}${pairingRequestUrl}/${brandCode}`;
 		return fetch(apiUrl, {
 			method: 'POST',
 			headers: {
@@ -15,7 +20,7 @@ module.exports = {
 		}).then(response => response.json());
 	},
 
-	pairingCheckoutRequest: (apiConfig, authToken, deviceToken, amount, store) => {
+	pairingCheckoutRequest: (authToken, deviceToken, amount, store) => {
 		const { pairingCheckoutRequestUrl, authKey, brandCode } = apiConfig;
 		const apiUrl = `${pairingCheckoutRequestUrl}/${brandCode}`;
 		return fetch(apiUrl, {
@@ -30,8 +35,8 @@ module.exports = {
 	},
 
 	precheckoutRequest: (apiConfig, authToken, deviceToken) => {
-		const { pairingCheckoutRequestUrl, authKey, brandCode } = apiConfig;
-		const apiUrl = `${pairingCheckoutRequestUrl}/${brandCode}`;
+		const { precheckoutRequestUrl, authKey, brandCode } = apiConfig;
+		const apiUrl = `${precheckoutRequestUrl}/${brandCode}`;
 		return fetch(apiUrl, {
 			method: 'POST',
 			headers: {
