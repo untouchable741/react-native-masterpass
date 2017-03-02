@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import { View, WebView } from 'react-native';
-import querystring from 'querystring';
-import Dimensions from 'Dimensions';
 import MasterpassManager from './MasterpassManager';
+import Dimensions from 'Dimensions';
+
+import url from 'url';
+import querystring from 'querystring';
 
 var width = Dimensions.get('window').width;
 
@@ -20,16 +22,12 @@ export default class Masterpass extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { authToken : 'RzY24fF2bMC2YQANv4E4fOUtfI3DJtGD',
+        this.state = { authToken : 'MbFR9a80JDAra68L0bhsrMEk9RMALF5J',
                        deviceToken : 'test_device' }
-
     }
 
-    componentWillMount() {
-        // this.sendPairingRequest()
-        // this.sendPairingCheckoutRequest();
-        // this.sendPrecheckoutRequest();
-        this.sendUnpairRequest();
+    componentWillMount() { 
+        this.sendPairingRequest();
     }
 
     sendUnpairRequest() {
@@ -49,12 +47,16 @@ export default class Masterpass extends Component {
     sendPairingCheckoutRequest() {
          MasterpassManager.pairingCheckoutRequest(this.state.authToken, this.state.deviceToken, 1000, 1).then(jsonResponse => {
             if (jsonResponse['success'] == true) {
-                console.log(jsonResponse['injectedJavaScript']);
                 this.setState({ injectedJavaScript: jsonResponse['injectedJavaScript']})
                 this.refs['authWebview'].reload();
             }
             else {
-                console.log('Pairing error ' + jsonResponse['message']);
+                if (typeof this.props.onPairingFail === 'function') {
+                    this.props.onPairingFail(jsonResponse['message']);
+                }
+                else {
+                    console.log('Please implement onPairingFail to receive error message');
+                }
             }
         })
     }
@@ -62,23 +64,41 @@ export default class Masterpass extends Component {
     sendPairingRequest() {
          MasterpassManager.pairingRequest(this.state.authToken, this.state.deviceToken).then(jsonResponse => {
             if (jsonResponse['success'] == true) {
-                console.log(jsonResponse['injectedJavaScript']);
                 this.setState({ injectedJavaScript: jsonResponse['injectedJavaScript']})
                 this.refs['authWebview'].reload();
             }
             else {
-                console.log('Pairing error ' + jsonResponse['message']);
+                if (typeof this.props.onParingFail === 'function') {
+                    this.props.onPairingFail(jsonResponse['message']);
+                }
+                else {
+                    console.log('Please implement onPairingFail to receive error message');
+                }
             }
         })
     }
 
+    onNavigationStateChange = (webview) => {
+        var urlComponents = url.parse(webview.url);
+        var queryString = querystring.parse(urlComponents.query);
+        var pathComponents = urlComponents.pathname.split('/')
+        let lastPathComponent = pathComponents[pathComponents.length - 1]
+        if (lastPathComponent === 'pairingSuccess') {
+            if (typeof this.props.onPairingCompleted === 'function') {
+                this.props.onPairingCompleted(queryString)
+            }
+            else {
+                console.log('Please implement onPairingCompleted to receive result object')
+            }
+        }
+    }
+
     render() {
-        console.log('injected ' + this.state.injectedJavaScript);
         return (
             <WebView style={styles.container}
                 source={{uri: `${apiConfig.baseUrl}` + '/masterpass'}}
                 injectedJavaScript = {this.state.injectedJavaScript}
-                ref='authWebview'/>
+                ref='authWebview' onNavigationStateChange={this.onNavigationStateChange}/>
         );
     }
 }

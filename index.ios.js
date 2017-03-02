@@ -15,10 +15,19 @@ import {
 import Masterpass from './src/Masterpass';
 
 export default class ReactNativeMasterpass extends Component {
+
+  onPairingCompleted = (result) => {
+    console.log(result);
+  }
+
+  onPairingFail = (error) => {
+    console.log(error);
+  }
+
   render() {
     return (
       <View style={styles.container}>
-        <Masterpass/>
+        <Masterpass onPairingCompleted={this.onPairingCompleted} onPairingFail={this.onPairingFail}/>
       </View>
     );
   }
