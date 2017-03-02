@@ -1,5 +1,9 @@
 import querystring from 'querystring';
+var Buffer = require('buffer/').Buffer;
 
+var decodeBase64 = (input) => {
+		return Buffer.from(input, 'base64').toString('utf8');
+}
 
 module.exports = {
 	initialize: (apiConfig) => {
@@ -21,8 +25,8 @@ module.exports = {
 	},
 
 	pairingCheckoutRequest: (authToken, deviceToken, amount, store) => {
-		const { pairingCheckoutRequestUrl, authKey, brandCode } = apiConfig;
-		const apiUrl = `${pairingCheckoutRequestUrl}/${brandCode}`;
+		const { baseUrl, pairingCheckoutRequestUrl, authKey, brandCode } = this.apiConfig;
+		const apiUrl = `${baseUrl}${pairingCheckoutRequestUrl}/${brandCode}`;
 		return fetch(apiUrl, {
 			method: 'POST',
 			headers: {
@@ -34,9 +38,9 @@ module.exports = {
 		}).then(response => response.json());
 	},
 
-	precheckoutRequest: (apiConfig, authToken, deviceToken) => {
-		const { precheckoutRequestUrl, authKey, brandCode } = apiConfig;
-		const apiUrl = `${precheckoutRequestUrl}/${brandCode}`;
+	precheckoutRequest: (authToken, deviceToken) => {
+		const { baseUrl, precheckoutRequestUrl, authKey, brandCode } = this.apiConfig;
+		const apiUrl = `${baseUrl}${precheckoutRequestUrl}/${brandCode}`;
 		return fetch(apiUrl, {
 			method: 'POST',
 			headers: {
@@ -48,14 +52,27 @@ module.exports = {
 		})
 			.then(response => response.json())
 			.then(responseJson => {
+				var decodedWalletData = decodeBase64(querystring.stringify(responseJson.walletData));
 				return {
 					...responseJson,
-					walletData: decodeBase64(responseJson.walletData)
+					walletData: decodedWalletData
 				}
 			});
 	},
-	
-	decodeBase64: (input) => {
-		return Buffer.from(input, 'base64').toString('utf8');
-	}
+
+	unpairingRequest: (authToken, deviceToken) => {
+		const { baseUrl, unpairCheckoutRequestUrl, authKey, brandCode } = this.apiConfig;
+		const apiUrl = `${baseUrl}${unpairCheckoutRequestUrl}/${brandCode}`;
+		return fetch(apiUrl, {
+			method: 'POST',
+			headers: {
+				'Authorization': authKey,
+				'Accept': 'application/json',
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: querystring.stringify({ authToken, deviceToken })
+		}).then(response => response.json());
+	},
+
+	decodeBase64,
 }

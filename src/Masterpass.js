@@ -26,7 +26,37 @@ export default class Masterpass extends Component {
     }
 
     componentWillMount() {
-        this.sendPairingRequest()
+        // this.sendPairingRequest()
+        // this.sendPairingCheckoutRequest();
+        // this.sendPrecheckoutRequest();
+        this.sendUnpairRequest();
+    }
+
+    sendUnpairRequest() {
+        MasterpassManager.unpairingRequest(this.state.authToken, this.state.deviceToken)
+            .then(response => {
+                console.log(response);
+            });
+    }
+
+    sendPrecheckoutRequest() {
+        MasterpassManager.precheckoutRequest(this.state.authToken, this.state.deviceToken)
+            .then(response => {
+                console.log(response);
+            })
+    }
+
+    sendPairingCheckoutRequest() {
+         MasterpassManager.pairingCheckoutRequest(this.state.authToken, this.state.deviceToken, 1000, 1).then(jsonResponse => {
+            if (jsonResponse['success'] == true) {
+                console.log(jsonResponse['injectedJavaScript']);
+                this.setState({ injectedJavaScript: jsonResponse['injectedJavaScript']})
+                this.refs['authWebview'].reload();
+            }
+            else {
+                console.log('Pairing error ' + jsonResponse['message']);
+            }
+        })
     }
 
     sendPairingRequest() {
