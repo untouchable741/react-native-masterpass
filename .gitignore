@@ -44,3 +44,5 @@ android/keystores/debug.keystore
 # VS CODE
 .vscode/
 typings/
+
+.vscode/
