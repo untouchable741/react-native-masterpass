@@ -1,7 +1,7 @@
 import Masterpass from './Masterpass'
-import MasterpassManager from './MasterpassManager'
+import MasterpassApi from './MasterpassApi'
 
-module.exports = {
+export {
 	Masterpass,
-	MasterpassManager
+	MasterpassApi
 }
