@@ -1,5 +1,7 @@
 import querystring from 'querystring';
 var Buffer = require('buffer/').Buffer;
+var parseString = require('react-native-xml2js').parseString;
+var stripPrefix = require('react-native-xml2js/lib/processors').stripPrefix;
 
 decodeBase64 = (input) => {
 		return Buffer.from(input, 'base64').toString('utf8');
@@ -37,6 +39,8 @@ class MasterpassApi {
 	pairingCheckoutRequest = (authToken, deviceToken, amount, store) => {
 		const { baseUrl, pairingCheckoutRequestUrl, authKey, brandCode } = this.apiConfig;
 		const apiUrl = `${baseUrl}${pairingCheckoutRequestUrl}/${brandCode}`;
+		bodyObject = { authToken, deviceToken, amount, store }
+		console.log('pairingCheckoutRequest '+apiUrl, bodyObject)
 		return fetch(apiUrl, {
 			method: 'POST',
 			headers: {
@@ -44,13 +48,13 @@ class MasterpassApi {
 				'Accept': 'application/json',
 				'Content-Type': 'application/x-www-form-urlencoded'
 			},
-			body: querystring.stringify({ authToken, deviceToken, amount, store })
+			body: querystring.stringify(bodyObject)
 		}).then(response => response.json());
 	}
 
 	precheckoutRequest = (authToken, deviceToken) => {
 		const { baseUrl, precheckoutRequestUrl, authKey, brandCode } = this.apiConfig;
-		const apiUrl = `${baseUrl}${precheckoutRequestUrl}/${brandCode}`;
+		var apiUrl = `${baseUrl}${precheckoutRequestUrl}/${brandCode}`;
 		return fetch(apiUrl, {
 			method: 'POST',
 			headers: {
@@ -61,13 +65,23 @@ class MasterpassApi {
 			body: querystring.stringify({ authToken, deviceToken })
 		})
 			.then(response => response.json())
-			.then(responseJson => {
-				var decodedWalletData = decodeBase64(querystring.stringify(responseJson.walletData));
-				return {
-					...responseJson,
-					walletData: decodedWalletData
-				}
-			});
+			.then(responseJson => (new Promise((res, rej) => {
+				if (!responseJson.success) return rej('response.success= false');
+
+				var decodedWalletData = decodeBase64(responseJson.walletData);
+
+				parseString(decodedWalletData, {
+					explicitArray: false,
+					tagNameProcessors: [stripPrefix]
+				},
+					(error, result) => {
+						res({
+							...responseJson,
+							walletData: result
+						})
+					});
+				}))
+			);
 	}
 
 	unpairingRequest = (authToken, deviceToken) => {
