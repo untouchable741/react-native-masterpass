@@ -66,7 +66,7 @@ class MasterpassApi {
 		})
 			.then(response => response.json())
 			.then(responseJson => (new Promise((res, rej) => {
-				if (!responseJson.success) return rej('response.success= false');
+				if (!responseJson.success) return rej('precheckoutRequest.success=false');
 
 				var decodedWalletData = decodeBase64(responseJson.walletData);
 

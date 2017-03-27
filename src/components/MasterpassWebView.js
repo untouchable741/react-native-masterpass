@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { View, WebView } from 'react-native';
-import MasterpassApi from './MasterpassApi';
+import MasterpassApi from '../MasterpassApi';
 
 import url from 'url';
 import querystring from 'querystring';
 
-export default class Masterpass extends Component {
+export default class MasterpassWebView extends Component {
 	masterpassApi = null;
 	apiConfig = null;
 
