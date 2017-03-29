@@ -9,6 +9,11 @@ export default class MasterpassWebView extends Component {
 	masterpassApi = null;
 	apiConfig = null;
 
+	pairingResultData = {
+		resourceId: '',
+		querystring: null
+	};
+
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -36,6 +41,8 @@ export default class MasterpassWebView extends Component {
 						if (jsonResponse['success'] == true) {
 								this.setState({ injectedJavaScript: jsonResponse['injectedJavaScript']})
 								this.refs['authWebview'].reload();
+
+								this.pairingResultData.resourceId = jsonResponse.resourceId;
 						}
 						else {
 								if (typeof onPairingFail === 'function') {
@@ -76,7 +83,8 @@ export default class MasterpassWebView extends Component {
 		let lastPathComponent = pathComponents[pathComponents.length - 1]
 		if (lastPathComponent === 'pairingSuccess' || lastPathComponent=== 'pairingCheckoutSuccess') {
 				if (!this.state.isFinished && typeof this.props.onPairingCompleted === 'function') {
-						this.props.onPairingCompleted(queryString)
+						this.pairingResultData.querystring = querystring;
+						this.props.onPairingCompleted(this.pairingResultData)
 						this.setState({
 								isFinished: true
 						})
