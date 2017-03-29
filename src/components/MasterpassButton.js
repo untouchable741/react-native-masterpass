@@ -32,10 +32,15 @@ class MasterpassButton extends Component {
 			cardsAvailable,
 			onOpenPairingAlert,
 			onOpenMissingCardAlert,
-			onOpenCardListView
+			onOpenCardListView,
+			checkoutPairing,
+			onProceedCheckout
 		} = this.props;
 
 		if (!paired) {
+			// user currently is already in pairing during checkout
+			if (checkoutPairing) return onProceedCheckout && onProceedCheckout();
+
 			// touch to open pairing alert
 			return onOpenPairingAlert && onOpenPairingAlert();
 		}
