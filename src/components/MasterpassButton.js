@@ -70,6 +70,7 @@ class MasterpassButton extends Component {
 					disabled={disabled}
 					onLongPress={this._onButtonLongPress}
 					onPress={this._onButtonPress}
+					delayLongPress={500}
 					>
 
 					<View style={{
