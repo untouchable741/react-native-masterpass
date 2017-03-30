@@ -1,3 +1,4 @@
+import * as Errors from './Errors'
 import querystring from 'querystring';
 var Buffer = require('buffer/').Buffer;
 var parseString = require('react-native-xml2js').parseString;
@@ -66,7 +67,10 @@ class MasterpassApi {
 		})
 			.then(response => response.json())
 			.then(responseJson => (new Promise((res, rej) => {
-				if (!responseJson.success) return rej('precheckoutRequest.success=false');
+				if (!responseJson.success) return rej({
+					code: Errors.EC_FAILURE_RESPONSE,
+					message: responseJson.message
+				});
 
 				var decodedWalletData = decodeBase64(responseJson.walletData);
 
@@ -80,8 +84,8 @@ class MasterpassApi {
 							walletData: result
 						})
 					});
-				}))
-			);
+				})))
+			;
 	}
 
 	unpairingRequest = (authToken, deviceToken) => {
