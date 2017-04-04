@@ -4,19 +4,21 @@ var Buffer = require('buffer/').Buffer;
 var parseString = require('react-native-xml2js').parseString;
 var stripPrefix = require('react-native-xml2js/lib/processors').stripPrefix;
 
-decodeBase64 = (input) => {
-		return Buffer.from(input, 'base64').toString('utf8');
-}
+import Transformers from './Transformers'
+
+// decodeBase64 = (input) => {
+// 		return Buffer.from(input, 'base64').toString('utf8');
+// }
 
 class MasterpassApi {
 	apiConfig = {
-		baseUrl: '',
-		authKey: '', 
-		brandCode: '',
-		pairingRequestUrl: '',
-		pairingCheckoutRequestUrl: '',
-		precheckoutRequestUrl: '',
-		unpairCheckoutRequestUrl: ''
+		// baseUrl: '',
+		// authKey: '', 
+		// brandCode: '',
+		// pairingRequestUrl: '',
+		// pairingCheckoutRequestUrl: '',
+		// precheckoutRequestUrl: '',
+		// unpairCheckoutRequestUrl: ''
 	}
 
 	constructor(apiConfig) {
@@ -53,7 +55,7 @@ class MasterpassApi {
 		}).then(response => response.json());
 	}
 
-	precheckoutRequest = (authToken, deviceToken) => {
+	precheckoutRequest = (authToken, deviceToken, transformers) => {
 		const { baseUrl, precheckoutRequestUrl, authKey, brandCode } = this.apiConfig;
 		var apiUrl = `${baseUrl}${precheckoutRequestUrl}/${brandCode}`;
 		return fetch(apiUrl, {
@@ -72,18 +74,28 @@ class MasterpassApi {
 					message: responseJson.message
 				});
 
-				var decodedWalletData = decodeBase64(responseJson.walletData);
-
-				parseString(decodedWalletData, {
-					explicitArray: false,
-					tagNameProcessors: [stripPrefix]
-				},
-					(error, result) => {
-						res({
+				Transformers.transform(responseJson.walletData, transformers)
+				.then(result => {
+					res({
 							...responseJson,
 							walletData: result
-						})
-					});
+					})
+				}).catch(error => {
+					rej(error);
+				})
+
+				// var decodedWalletData = decodeBase64(responseJson.walletData);
+
+				// parseString(decodedWalletData, {
+				// 	explicitArray: false,
+				// 	tagNameProcessors: [stripPrefix]
+				// },
+				// 	(error, result) => {
+				// 		res({
+				// 			...responseJson,
+				// 			walletData: result
+				// 		})
+				// 	});
 				})))
 			;
 	}
