@@ -1,14 +1,7 @@
-import * as Errors from './Errors'
 import querystring from 'querystring';
-var Buffer = require('buffer/').Buffer;
-var parseString = require('react-native-xml2js').parseString;
-var stripPrefix = require('react-native-xml2js/lib/processors').stripPrefix;
-
+import * as Errors from './Errors'
 import Transformers from './Transformers'
-
-// decodeBase64 = (input) => {
-// 		return Buffer.from(input, 'base64').toString('utf8');
-// }
+import ApiRequest from './ApiRequest'
 
 class MasterpassApi {
 	apiConfig = {
@@ -21,8 +14,11 @@ class MasterpassApi {
 		// unpairCheckoutRequestUrl: ''
 	}
 
+	apiRequest = null;
+
 	constructor(apiConfig) {
 		this.apiConfig = apiConfig;
+		this.apiRequest = ApiRequest.instantiate(apiConfig);
 	}
 
 	pairingRequest = (authToken, deviceToken) => {
@@ -56,18 +52,7 @@ class MasterpassApi {
 	}
 
 	precheckoutRequest = (authToken, deviceToken, transformers) => {
-		const { baseUrl, precheckoutRequestUrl, authKey, brandCode } = this.apiConfig;
-		var apiUrl = `${baseUrl}${precheckoutRequestUrl}/${brandCode}`;
-		return fetch(apiUrl, {
-			method: 'POST',
-			headers: {
-				'Authorization': authKey,
-				'Accept': 'application/json',
-				'Content-Type': 'application/x-www-form-urlencoded'
-			},
-			body: querystring.stringify({ authToken, deviceToken })
-		})
-			.then(response => response.json())
+		return this.apiRequest.precheckout(authToken, deviceToken)
 			.then(responseJson => (new Promise((res, rej) => {
 				if (!responseJson.success) return rej({
 					code: Errors.EC_FAILURE_RESPONSE,
@@ -83,21 +68,7 @@ class MasterpassApi {
 				}).catch(error => {
 					rej(error);
 				})
-
-				// var decodedWalletData = decodeBase64(responseJson.walletData);
-
-				// parseString(decodedWalletData, {
-				// 	explicitArray: false,
-				// 	tagNameProcessors: [stripPrefix]
-				// },
-				// 	(error, result) => {
-				// 		res({
-				// 			...responseJson,
-				// 			walletData: result
-				// 		})
-				// 	});
-				})))
-			;
+				})));
 	}
 
 	unpairingRequest = (authToken, deviceToken) => {
