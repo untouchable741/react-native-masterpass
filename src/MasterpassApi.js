@@ -61,9 +61,14 @@ class MasterpassApi {
 
 				Transformers.transform(responseJson.walletData, transformers)
 				.then(result => {
+					var jsonResult = result;
+					if (typeof jsonResult === 'string') {
+						jsonResult = JSON.parse(jsonResult);
+					}
+
 					res({
 							...responseJson,
-							walletData: result
+							walletData: jsonResult
 					})
 				}).catch(error => {
 					rej(error);
