@@ -9,6 +9,9 @@ export default class MasterpassWebView extends Component {
 	masterpassApi = null;
 	apiConfig = null;
 
+	successSignals = ['pairingSuccess', 'pairingCheckoutSuccess']
+	failureSignals = ['pairingCancel', 'pairingFail', 'pairingCheckoutCancel', 'pairingCheckoutFail']
+
 	pairingResultData = {
 		pairingResponse: null,
 		successCallbackUrl: null
@@ -80,19 +83,33 @@ export default class MasterpassWebView extends Component {
 	onNavigationStateChange = (webview) => {
 		var urlComponents = url.parse(webview.url);
 		var queryString = querystring.parse(urlComponents.query);
-		var pathComponents = urlComponents.pathname.split('/')
-		let lastPathComponent = pathComponents[pathComponents.length - 1]
-		if (lastPathComponent === 'pairingSuccess' || lastPathComponent=== 'pairingCheckoutSuccess') {
-			//Check if webview actually finished loading
-			if (webview.loading == false) {
-				if (typeof this.props.onPairingCompleted === 'function') {
+		//Check if webview actually finished loading
+		//Prevent multiple callbacks on duplicated redirect
+		if (webview.loading == false) {
+			//Check if this is success callback
+			this.successSignals.forEach(signal => {
+				if (webview.url.indexOf(signal) != -1) {
+					if (typeof this.props.onPairingCompleted === 'function') {
 					this.pairingResultData.querystring = querystring;
 					this.props.onPairingCompleted(this.pairingResultData)
+					}
+					else {
+						console.log('Please implement onPairingCompleted to receive result object')
+					}
 				}
-				else {
-					console.log('Please implement onPairingCompleted to receive result object')
+			})
+
+			//Check if this is failure callback
+			this.failureSignals.forEach(signal => {
+				if (webview.url.indexOf(signal) != -1) {
+					if (typeof this.props.onPairingFail === 'function') {
+						this.props.onPairingFail(signal)
+					}
+					else {
+						console.log(`${signal}, please implement onPairingFail to receive the error message`)
+					}
 				}
-			}
+			})
 		}
 	}
 
