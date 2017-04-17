@@ -18,8 +18,7 @@ export default class MasterpassWebView extends Component {
 		super(props);
 		this.state = {
 				authToken: props.authToken,
-				deviceToken: props.deviceToken,
-				isFinished: false
+				deviceToken: props.deviceToken
 		}
 
 		this.apiConfig = props.config;		
@@ -84,17 +83,16 @@ export default class MasterpassWebView extends Component {
 		var pathComponents = urlComponents.pathname.split('/')
 		let lastPathComponent = pathComponents[pathComponents.length - 1]
 		if (lastPathComponent === 'pairingSuccess' || lastPathComponent=== 'pairingCheckoutSuccess') {
-				if (!this.state.isFinished) {
-					if (typeof this.props.onPairingCompleted === 'function') {
-						this.pairingResultData.successCallbackUrl = queryString;
-						this.props.onPairingCompleted(this.pairingResultData)
-						this.setState({
-								isFinished: true
-						})
-					} else {
-						console.log('Please implement onPairingCompleted to receive result object')
-					}
+			//Check if webview actually finished loading
+			if (webview.loading == false) {
+				if (typeof this.props.onPairingCompleted === 'function') {
+					this.pairingResultData.querystring = querystring;
+					this.props.onPairingCompleted(this.pairingResultData)
 				}
+				else {
+					console.log('Please implement onPairingCompleted to receive result object')
+				}
+			}
 		}
 	}
 
