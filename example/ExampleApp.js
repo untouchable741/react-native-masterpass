@@ -23,19 +23,19 @@ const windowWidth = Dimensions.get('window').width;
 
 export default class ExampleApp extends Component {
 	apiConfig = {
-		baseUrl: 'http://camacafe.savantdegrees.com',
-		authKey: 'q4bNJeJ5xmlXBD0zxuo7ho1BbPrOm8Yl', 
-		brandCode: 'cama',
-		pairingRequestUrl: '/api/1.0/cub/pairingRequest/',
-		pairingCheckoutRequestUrl: '/api/1.0/cub/pairingCheckoutRequest/',
-		precheckoutRequestUrl: '/api/1.0/cub/precheckoutRequest/',
-		unpairCheckoutRequestUrl: '/api/1.0/cub/unpairingRequest/',
+		baseUrl: '<Base Url>',
+		authKey: '<Auth Key>', 
+		brandCode: '<Brand Code>',
+		pairingRequestUrl: '<Pairing Request Url>',
+		pairingCheckoutRequestUrl: '<Pairing Checkout Request Url>',
+		precheckoutRequestUrl: '<Precheckout Request Url>',
+		unpairCheckoutRequestUrl: '<Unpair Checkout Request Url>',
 	}
 
 	exampleProps = {
 		checkoutParams: null,
-		authToken: 'yBD0vtDqtywfJRQPdLtVV7dT9yEXvbBf',	// should refresh this if expired
-		deviceToken: 'admin2359',
+		authToken: '<Auth token>',	// should refresh this if expired
+		deviceToken: '<Unique token of device>',
 	}
 
 	state = {
